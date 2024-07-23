@@ -1,49 +1,71 @@
 /* eslint-disable camelcase */
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import Rules from './styles.module.scss';
 import { ProductFormData, schema } from './schema';
 import { useProductsStore } from '../../stores';
 import { Loader } from '../Loader';
-import React from 'react';
+import { convertDateToString, Product } from '../../core';
 
 export const RegisterForm = (): JSX.Element => {
+	const location = useLocation();
+	const navigate = useNavigate();
+
 	const createProduct = useProductsStore((state) => state.createProduct);
-	const verifyProductId = useProductsStore((state) => state.verifyProductId);
 
 	const isLoading = useProductsStore((state) => state.isLoading);
 	const error = useProductsStore((state) => state.error);
-	const isValidId = useProductsStore((state) => state.isValidId);
+	const createdProduct = useProductsStore((state) => state.createdProduct);
 
 	const form = useForm<ProductFormData>({ resolver: zodResolver(schema) });
+
+	const product = location.state as Product | undefined;
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 		reset,
-		setError
+		setValue
 	} = form;
 
-	const onSubmitPrev = React.useCallback(
-		async (data: ProductFormData) => {
-			if (!(await checkValidId(data))) return;
-			onSubmit(data);
-		},
-		[checkValidId, onSubmit]
-	);
+	// Set the initial values of the form when the product is loaded
+	React.useEffect(() => {
+		if (!product) return;
+		setValue('id', product.id);
+		setValue('name', product.name);
+		setValue('description', product.description);
+		setValue('logo', product.logo);
+		setValue('date_release', convertDateToString(new Date(product.date_release)));
+		setValue('date_revision', convertDateToString(new Date(product.date_revision)));
+	}, []);
+
+	// Redirect to the home page when the product is created
+	React.useEffect(() => {
+		if (createdProduct) {
+			handleReset();
+			navigate('/');
+		}
+	}, [createdProduct]);
 
 	if (isLoading) return <Loader />;
 
 	return (
 		<div className={Rules.container}>
-			<h1 className={Rules.title}>Formulario de Registro</h1>
+			<h1 className={Rules.title}>Formulario de {product ? 'Edición' : 'Registro'}</h1>
 			<hr />
-			<form className={Rules.form} onSubmit={handleSubmit(onSubmitPrev)}>
+			<form className={Rules.form} onSubmit={handleSubmit(onSubmit)}>
 				<div className={Rules.formGroup}>
 					<label htmlFor="id">ID</label>
-					<input type="text" {...register('id')} className={errors.id ? Rules.invalid : ''} />
+					<input
+						type="text"
+						disabled={Boolean(product)}
+						{...register('id')}
+						className={errors.id ? Rules.invalid : ''}
+					/>
 					{errors.id && <span className={Rules.error}>{errors.id.message}</span>}
 				</div>
 
@@ -100,15 +122,6 @@ export const RegisterForm = (): JSX.Element => {
 			</form>
 		</div>
 	);
-
-	async function checkValidId(data: ProductFormData): Promise<boolean> {
-		await verifyProductId(data.id);
-		if (isValidId) {
-			setError('id', { type: 'validate', message: 'El ID ya existe' });
-			return false;
-		}
-		return true;
-	}
 
 	async function onSubmit(data: ProductFormData): Promise<void> {
 		await createProduct(data);

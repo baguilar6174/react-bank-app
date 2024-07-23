@@ -43,21 +43,6 @@ export class ProductsService {
 			throw AppError.internalServer('Server error in create product');
 		}
 	};
-
-	static verifyProductId = async (id: string): Promise<boolean> => {
-		try {
-			const { data } = await API.get<boolean>(`/products/verification/${id}`);
-			return data;
-		} catch (error) {
-			if (error instanceof AxiosError) {
-				// eslint-disable-next-line no-unsafe-optional-chaining
-				const { name, message } = error.response?.data;
-				throw new AppError({ name, message });
-			}
-			throw AppError.internalServer('Server error in verify product id');
-		}
-	};
-
 	static deleteProduct = async (id: string): Promise<RemoveProductResponse> => {
 		try {
 			const { data } = await API.delete<RemoveProductResponse>(`/products/${id}`);

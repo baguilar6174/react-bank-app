@@ -7,7 +7,7 @@ import { ProductFormData } from '../components/RegisterForm/schema';
 
 interface State {
 	products: Product[];
-	isValidId?: boolean;
+	createdProduct?: Product;
 	isLoading: boolean;
 	error?: ErrorResponse;
 	message?: string;
@@ -16,7 +16,6 @@ interface State {
 interface Actions {
 	getProducts: () => Promise<void>;
 	createProduct: (data: ProductFormData) => Promise<void>;
-	verifyProductId: (id: string) => Promise<void>;
 	deleteProduct: (id: string) => Promise<void>;
 }
 
@@ -24,13 +23,14 @@ type Store = State & Actions;
 
 const productsAPI: StateCreator<Store> = (set, get) => ({
 	products: [],
+	createdProduct: undefined,
 	isLoading: false,
 	getProducts: async (): Promise<void> => {
 		const state = get();
 		set({ ...state, isLoading: true, error: undefined });
 		try {
 			const result = await ProductsService.getProducts();
-			set({ isLoading: false, products: result.data });
+			set({ isLoading: false, products: result.data, createdProduct: undefined });
 		} catch (error) {
 			set({ isLoading: false, products: [], error: error as ErrorResponse });
 		}
@@ -40,17 +40,12 @@ const productsAPI: StateCreator<Store> = (set, get) => ({
 		set({ ...state, isLoading: true, error: undefined });
 		try {
 			const result = await ProductsService.createProduct(data);
-			set({ isLoading: false, products: [...state.products, result.data], message: result.message });
-		} catch (error) {
-			set({ isLoading: false, error: error as ErrorResponse });
-		}
-	},
-	verifyProductId: async (id: string): Promise<void> => {
-		const state = get();
-		set({ ...state, isLoading: true, error: undefined });
-		try {
-			const result = await ProductsService.verifyProductId(id);
-			set({ isLoading: false, isValidId: result });
+			set({
+				isLoading: false,
+				products: [...state.products, result.data],
+				message: result.message,
+				createdProduct: result.data
+			});
 		} catch (error) {
 			set({ isLoading: false, error: error as ErrorResponse });
 		}

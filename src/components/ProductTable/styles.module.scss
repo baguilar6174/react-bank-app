@@ -134,3 +134,34 @@
 		width: 90%;
 	}
 }
+
+.dropdownToggle {
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 4px;
+}
+
+.dropdownMenu {
+	position: absolute;
+	background-color: white;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	z-index: 1000;
+	min-width: 120px; // Ajusta el ancho mínimo si es necesario
+}
+
+.dropdownMenu li {
+	padding: 10px;
+	cursor: pointer;
+}
+
+.dropdownMenu li:hover {
+	background-color: #f1f1f1;
+}

@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +9,7 @@ import { Modal } from '../Modal';
 import { useProductsStore } from '../../stores';
 import { Loader } from '../Loader';
 import { formatDate, Product } from '../../core';
-import { Dropdown } from '../Dropdown';
+import { KebabVertical } from '../icons';
 
 export const ProductTable = (): JSX.Element => {
 	const navigate = useNavigate();
@@ -18,6 +21,7 @@ export const ProductTable = (): JSX.Element => {
 	const getProducts = useProductsStore((state) => state.getProducts);
 	const deleteProduct = useProductsStore((state) => state.deleteProduct);
 
+	// Get products from the server
 	React.useEffect(() => {
 		getProducts();
 	}, []);
@@ -25,8 +29,9 @@ export const ProductTable = (): JSX.Element => {
 	const [searchTerm, setSearchTerm] = React.useState<string>('');
 	const [resultsPerPage, setResultsPerPage] = React.useState<number>(5);
 	const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
-	const [isDropdownOpen, setIsDropdownOpen] = React.useState<boolean>(false);
 	const [product, setProduct] = React.useState<Product | undefined>(undefined);
+	const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
+	const [dropdownPosition, setDropdownPosition] = React.useState<{ [key: string]: { top: number; left: number } }>({});
 
 	const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -72,12 +77,19 @@ export const ProductTable = (): JSX.Element => {
 									<td>{formatDate(product.date_release.toString())}</td>
 									<td>{formatDate(product.date_revision.toString())}</td>
 									<td>
-										<Dropdown
-											isOpen={isDropdownOpen}
-											toggleDropdown={() => toggleDropdown(product)}
-											handleRemove={handleOpenModal}
-											handleEdit={navigateToForm}
-										/>
+										<KebabVertical onClick={(e) => toggleDropdown(product, e)} />
+										{openDropdown === product.id && (
+											<ul
+												className={Rules.dropdownMenu}
+												style={{
+													top: dropdownPosition[product.id]?.top,
+													left: dropdownPosition[product.id]?.left
+												}}
+											>
+												<li onClick={navigateToForm}>Editar</li>
+												<li onClick={handleOpenDeleteModal}>Eliminar</li>
+											</ul>
+										)}
 									</td>
 								</tr>
 							))}
@@ -92,32 +104,48 @@ export const ProductTable = (): JSX.Element => {
 						<option value={20}>20</option>
 					</select>
 				</div>
-				{message && <span>{message}</span>}
+				{message && (
+					<div>
+						<small>{message}</small>
+					</div>
+				)}
 			</div>
-			{isModalOpen && <Modal title={product?.name || ''} onCancel={handleCloseModal} onConfirm={handleConfirm} />}
+			{isModalOpen && (
+				<Modal title={product?.name || ''} onCancel={handleCloseDeleteModal} onConfirm={handleDeleteProduct} />
+			)}
 		</React.Fragment>
 	);
 
-	function navigateToForm(): void {
-		navigate('/form');
-	}
-
-	function toggleDropdown(product: Product): void {
+	function toggleDropdown(product: Product, event: React.MouseEvent<SVGSVGElement>): void {
 		setProduct(product);
-		setIsDropdownOpen(!isDropdownOpen);
+		const rect = (event.target as HTMLElement).getBoundingClientRect();
+		setDropdownPosition({
+			...dropdownPosition,
+			[product.id]: {
+				top: rect.bottom + window.scrollY,
+				left: rect.left + window.scrollX - 120
+			}
+		});
+		setOpenDropdown((prevId) => (prevId === product.id ? null : product.id));
 	}
 
-	async function handleConfirm(): Promise<void> {
+	function navigateToForm(): void {
+		navigate('/form', { state: product });
+		setOpenDropdown(null);
+	}
+
+	async function handleDeleteProduct(): Promise<void> {
 		if (!product) return;
 		await deleteProduct(product.id);
-		handleCloseModal();
+		handleCloseDeleteModal();
 	}
 
-	function handleOpenModal(): void {
+	function handleOpenDeleteModal(): void {
 		setIsModalOpen(true);
+		setOpenDropdown(null);
 	}
 
-	function handleCloseModal(): void {
+	function handleCloseDeleteModal(): void {
 		setProduct(undefined);
 		setIsModalOpen(false);
 	}

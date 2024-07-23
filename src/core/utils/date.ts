@@ -5,3 +5,7 @@ export const formatDate = (dateString: string): string => {
 	const year = date.getUTCFullYear();
 	return `${day}/${month}/${year}`;
 };
+
+export const convertDateToString = (date: Date): string => {
+	return date.toISOString().split('T')[0]; // Convertir a 'YYYY-MM-DD'
+};
