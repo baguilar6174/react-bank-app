@@ -1,74 +1,36 @@
-import React, { SVGProps } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Rules from './styles.module.scss';
 import { Modal } from '../Modal';
-
-interface Product {
-	id: number;
-	logo: string;
-	name: string;
-	description: string;
-	releaseDate: string;
-	restructureDate: string;
-}
+import { useProductsStore } from '../../stores';
+import { Loader } from '../Loader';
+import { formatDate, Product } from '../../core';
+import { Dropdown } from '../Dropdown';
 
 export const ProductTable = (): JSX.Element => {
+	const navigate = useNavigate();
+
+	const isLoading = useProductsStore((state) => state.isLoading);
+	const products = useProductsStore((state) => state.products);
+	const message = useProductsStore((state) => state.message);
+
+	const getProducts = useProductsStore((state) => state.getProducts);
+	const deleteProduct = useProductsStore((state) => state.deleteProduct);
+
+	React.useEffect(() => {
+		getProducts();
+	}, []);
+
 	const [searchTerm, setSearchTerm] = React.useState<string>('');
 	const [resultsPerPage, setResultsPerPage] = React.useState<number>(5);
 	const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
-
-	const handleOpenModal = (): void => setIsModalOpen(true);
-	const handleCloseModal = (): void => setIsModalOpen(false);
-	const handleConfirm = (): void => {
-		// Lógica para confirmar
-		handleCloseModal();
-	};
-
-	// Mock data - replace with actual data fetching logic
-	const products: Product[] = [
-		{
-			id: 1,
-			logo: 'AP',
-			name: 'Nombre del producto',
-			description: 'Descripción',
-			releaseDate: '01/01/2000',
-			restructureDate: '01/01/2001'
-		},
-		{
-			id: 2,
-			logo: 'LO',
-			name: 'Nombre del producto',
-			description: 'Descripción',
-			releaseDate: '01/01/2000',
-			restructureDate: '01/01/2001'
-		},
-		{
-			id: 3,
-			logo: 'JS',
-			name: 'Nombre del producto',
-			description: 'Descripción',
-			releaseDate: '01/01/2000',
-			restructureDate: '01/01/2001'
-		},
-		{
-			id: 4,
-			logo: 'AP',
-			name: 'Nombre del producto',
-			description: 'Descripción',
-			releaseDate: '01/01/2000',
-			restructureDate: '01/01/2001'
-		},
-		{
-			id: 5,
-			logo: 'JS',
-			name: 'Nombre del producto',
-			description: 'Descripción',
-			releaseDate: '01/01/2000',
-			restructureDate: '01/01/2001'
-		}
-	];
+	const [isDropdownOpen, setIsDropdownOpen] = React.useState<boolean>(false);
+	const [product, setProduct] = React.useState<Product | undefined>(undefined);
 
 	const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+	if (isLoading) return <Loader />;
 
 	return (
 		<React.Fragment>
@@ -81,7 +43,9 @@ export const ProductTable = (): JSX.Element => {
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className={Rules.searchInput}
 					/>
-					<button className={Rules.submit}>Agregar</button>
+					<button className={Rules.submit} onClick={navigateToForm}>
+						Agregar
+					</button>
 				</div>
 			</div>
 			<div className={Rules.container}>
@@ -105,10 +69,15 @@ export const ProductTable = (): JSX.Element => {
 									</td>
 									<td>{product.name}</td>
 									<td>{product.description}</td>
-									<td>{product.releaseDate}</td>
-									<td>{product.restructureDate}</td>
+									<td>{formatDate(product.date_release.toString())}</td>
+									<td>{formatDate(product.date_revision.toString())}</td>
 									<td>
-										<KebabVertical onClick={handleOpenModal} />
+										<Dropdown
+											isOpen={isDropdownOpen}
+											toggleDropdown={() => toggleDropdown(product)}
+											handleRemove={handleOpenModal}
+											handleEdit={navigateToForm}
+										/>
 									</td>
 								</tr>
 							))}
@@ -123,22 +92,33 @@ export const ProductTable = (): JSX.Element => {
 						<option value={20}>20</option>
 					</select>
 				</div>
+				{message && <span>{message}</span>}
 			</div>
-			{isModalOpen && <Modal title="tu_producto" onCancel={handleCloseModal} onConfirm={handleConfirm} />}
+			{isModalOpen && <Modal title={product?.name || ''} onCancel={handleCloseModal} onConfirm={handleConfirm} />}
 		</React.Fragment>
 	);
-};
 
-export function KebabVertical(props: SVGProps<SVGSVGElement>): JSX.Element {
-	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" {...props}>
-			<path
-				fill="none"
-				stroke="currentColor"
-				strokeLinejoin="round"
-				strokeWidth="3"
-				d="M12 12h.01v.01H12zm0-7h.01v.01H12zm0 14h.01v.01H12z"
-			/>
-		</svg>
-	);
-}
+	function navigateToForm(): void {
+		navigate('/form');
+	}
+
+	function toggleDropdown(product: Product): void {
+		setProduct(product);
+		setIsDropdownOpen(!isDropdownOpen);
+	}
+
+	async function handleConfirm(): Promise<void> {
+		if (!product) return;
+		await deleteProduct(product.id);
+		handleCloseModal();
+	}
+
+	function handleOpenModal(): void {
+		setIsModalOpen(true);
+	}
+
+	function handleCloseModal(): void {
+		setProduct(undefined);
+		setIsModalOpen(false);
+	}
+};
