@@ -1,30 +1,67 @@
-# React + TypeScript + Vite
+# Dev Challenge React + TypeScript
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Installation
 
-Currently, two official plugins are available:
+Clone this repository
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.app.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+```bash
+git clone https://github.com/baguilar6174/react-bank-app.git
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Install dependencies
+
+```bash
+npm install
+```
+
+## Running the app
+
+Run `npm run dev`
+
+## My process
+
+### Built with
+
+- React
+- Typescript
+- Vite
+- ESLint & Prettier
+- React Testing Library
+- React Router
+- React Hook Form + Zod
+- Axios
+- Zustand
+- Sass
+
+<table>
+  <tr>
+    <td align="center" valign="center"><img src="./media/desktop-1.png" width="100%"></td>
+    <td align="center" valign="center"><img src="./media/desktop-2.png" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center" valign="center"><img src="./media/desktop-3.png" width="100%"></td>
+    <td align="center" valign="center"><img src="./media/desktop-4.png" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center" valign="center"><img src="./media/desktop-5.png" width="100%"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center" valign="center"><img src="./media/mobile-1.png" width="100%"></td>
+    <td align="center" valign="center"><img src="./media/mobile-3.png" width="100%"></td>
+    <td align="center" valign="center"><img src="./media/mobile-2.png" width="100%"></td>
+    <td align="center" valign="center"><img src="./media/mobile-4.png" width="100%"></td>
+  </tr>
+</table>
+
+---
+
+## Stay in touch
+
+- Website - [www.bryan-aguilar.com](https://www.bryan-aguilar.com/)
+- Medium - [baguilar6174](https://baguilar6174.medium.com/)
+- LinkeIn - [baguilar6174](https://www.linkedin.com/in/baguilar6174)
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
