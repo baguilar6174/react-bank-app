@@ -9,7 +9,7 @@ import { Modal } from '../Modal';
 import { useProductsStore } from '../../stores';
 import { Loader } from '../Loader';
 import { formatDate, Product } from '../../core';
-import { KebabVertical } from '../icons';
+import { InfoIcon, KebabVerticalIcon } from '../icons';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Alert } from '../Alert';
 
@@ -72,9 +72,15 @@ export const ProductTable = (): JSX.Element => {
 							<tr>
 								<th>Logo</th>
 								<th>Nombre del producto</th>
-								<th>Descripción</th>
-								<th>Fecha de liberación</th>
-								<th>Fecha de reestructuración</th>
+								<th>
+									Descripción <InfoIcon height={'20px'} width={'20px'} />
+								</th>
+								<th>
+									Fecha de liberación <InfoIcon height={'20px'} width={'20px'} />
+								</th>
+								<th>
+									Fecha de reestructuración <InfoIcon height={'20px'} width={'20px'} />
+								</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -94,7 +100,7 @@ export const ProductTable = (): JSX.Element => {
 									<td>{formatDate(product.date_release.toString())}</td>
 									<td>{formatDate(product.date_revision.toString())}</td>
 									<td>
-										<KebabVertical onClick={(e) => toggleDropdown(product, e)} />
+										<KebabVerticalIcon onClick={(e) => toggleDropdown(product, e)} />
 										{openDropdown === product.id && (
 											<ul
 												className={Rules.dropdownMenu}

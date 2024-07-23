@@ -67,6 +67,12 @@
 			border-bottom: 1px solid #e0e0e0;
 			white-space: nowrap; // Previene el salto de línea en encabezados
 
+			svg {
+				margin-left: 4px;
+				position: relative;
+				top: 4px;
+			}
+
 			&:first-child {
 				text-align: center;
 			}
