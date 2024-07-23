@@ -20,7 +20,7 @@ export interface RemoveProductResponse {
 	message: string;
 }
 
-export interface AddProductResponse {
+export interface UpdateProductResponse {
 	message: string;
 	data: Product;
 }

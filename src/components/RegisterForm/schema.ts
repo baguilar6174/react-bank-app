@@ -1,21 +1,13 @@
 /* eslint-disable camelcase */
 import { z } from 'zod';
-import { API } from '../../core';
+// import { API } from '../../core';
 
 export const schema = z
 	.object({
 		id: z
 			.string({ required_error: 'ID es requerido' })
 			.min(3, 'ID debe tener al menos 3 caracteres')
-			.max(10, 'ID no puede tener más de 10 caracteres')
-			.refine(async (value) => {
-				try {
-					const { data } = await API.get(`/products/verification/${value}`);
-					return !data;
-				} catch (error) {
-					return false;
-				}
-			}, 'Este ID ya existe'),
+			.max(10, 'ID no puede tener más de 10 caracteres'),
 		name: z
 			.string({ required_error: 'Nombre es requerido' })
 			.min(5, 'Nombre debe tener al menos 5 caracteres')
@@ -24,7 +16,7 @@ export const schema = z
 			.string({ required_error: 'Descripción es requerida' })
 			.min(10, 'Descripción debe tener al menos 10 caracteres')
 			.max(200, 'Descripción no puede tener más de 200 caracteres'),
-		logo: z.string({ required_error: 'Logo es requerido' }).min(2, 'Descripción debe tener al menos 2 caracteres'),
+		logo: z.string({ required_error: 'Logo es requerido' }).url('Debe ser una URL válida'),
 		date_release: z.string({ required_error: 'Fecha de Liberación es requerida' }),
 		date_revision: z.string({ required_error: 'Fecha de Revisión es requerida' })
 	})

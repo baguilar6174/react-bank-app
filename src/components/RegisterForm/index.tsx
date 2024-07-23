@@ -9,16 +9,18 @@ import { ProductFormData, schema } from './schema';
 import { useProductsStore } from '../../stores';
 import { Loader } from '../Loader';
 import { convertDateToString, Product } from '../../core';
+import { Alert } from '../Alert';
 
 export const RegisterForm = (): JSX.Element => {
 	const location = useLocation();
 	const navigate = useNavigate();
 
 	const createProduct = useProductsStore((state) => state.createProduct);
+	const updateProduct = useProductsStore((state) => state.updateProduct);
 
 	const isLoading = useProductsStore((state) => state.isLoading);
 	const error = useProductsStore((state) => state.error);
-	const createdProduct = useProductsStore((state) => state.createdProduct);
+	const updatedProduct = useProductsStore((state) => state.updatedProduct);
 
 	const form = useForm<ProductFormData>({ resolver: zodResolver(schema) });
 
@@ -29,8 +31,17 @@ export const RegisterForm = (): JSX.Element => {
 		handleSubmit,
 		formState: { errors },
 		reset,
-		setValue
+		setValue,
+		setError
 	} = form;
+
+	// Set error message when the product ID already exists
+	React.useEffect(() => {
+		if (error?.name === 'ProductIdAlreadyExists') {
+			setError('id', { type: 'validate', message: 'El ID ya existe' });
+			return;
+		}
+	}, [error]);
 
 	// Set the initial values of the form when the product is loaded
 	React.useEffect(() => {
@@ -45,11 +56,11 @@ export const RegisterForm = (): JSX.Element => {
 
 	// Redirect to the home page when the product is created
 	React.useEffect(() => {
-		if (createdProduct) {
+		if (updatedProduct) {
 			handleReset();
 			navigate('/');
 		}
-	}, [createdProduct]);
+	}, [updatedProduct]);
 
 	if (isLoading) return <Loader />;
 
@@ -106,11 +117,10 @@ export const RegisterForm = (): JSX.Element => {
 
 				{error && (
 					<div className={Rules.error}>
-						<p>{error.message}</p>
+						<Alert type="error" message={error.message} />
 						{error.constraints?.map((constraint, index) => <p key={index}>{constraint}</p>)}
 					</div>
 				)}
-
 				<div className={Rules.buttons}>
 					<button type="button" onClick={handleReset} className={Rules.reset}>
 						Reiniciar
@@ -124,6 +134,10 @@ export const RegisterForm = (): JSX.Element => {
 	);
 
 	async function onSubmit(data: ProductFormData): Promise<void> {
+		if (product) {
+			await updateProduct(product.id, data);
+			return;
+		}
 		await createProduct(data);
 	}
 

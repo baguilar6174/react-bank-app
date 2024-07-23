@@ -10,6 +10,8 @@ import { useProductsStore } from '../../stores';
 import { Loader } from '../Loader';
 import { formatDate, Product } from '../../core';
 import { KebabVertical } from '../icons';
+import { ImageWithFallback } from '../ImageWithFallback';
+import { Alert } from '../Alert';
 
 export const ProductTable = (): JSX.Element => {
 	const navigate = useNavigate();
@@ -33,7 +35,16 @@ export const ProductTable = (): JSX.Element => {
 	const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
 	const [dropdownPosition, setDropdownPosition] = React.useState<{ [key: string]: { top: number; left: number } }>({});
 
-	const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
+	const isInputDisabled = isLoading || products.length === 0;
+
+	const filteredProducts = products.filter((product) => {
+		const searchTermLower = searchTerm.toLowerCase();
+		return (
+			product.name.toLowerCase().includes(searchTermLower) ||
+			product.id.toString().toLowerCase().includes(searchTermLower) ||
+			product.description.toLowerCase().includes(searchTermLower)
+		);
+	});
 
 	if (isLoading) return <Loader />;
 
@@ -42,6 +53,7 @@ export const ProductTable = (): JSX.Element => {
 			<div className={Rules.containerHeader}>
 				<div className={Rules.searchContainer}>
 					<input
+						disabled={isInputDisabled}
 						type="text"
 						placeholder="Search..."
 						value={searchTerm}
@@ -70,7 +82,12 @@ export const ProductTable = (): JSX.Element => {
 							{filteredProducts.slice(0, resultsPerPage).map((product) => (
 								<tr key={product.id}>
 									<td>
-										<div className={Rules.logo}>{product.logo}</div>
+										<ImageWithFallback
+											src={product.logo}
+											alt={product.name}
+											fallbackComponent={() => <FallbackComponent name={product.name} />}
+											width={'40px'}
+										/>
 									</td>
 									<td>{product.name}</td>
 									<td>{product.description}</td>
@@ -96,25 +113,29 @@ export const ProductTable = (): JSX.Element => {
 						</tbody>
 					</table>
 				</div>
+				{message && <Alert type="info" message={message} />}
 				<div className={Rules.tableFooter}>
 					<span>{filteredProducts.length} Resultados</span>
-					<select value={resultsPerPage} onChange={(e) => setResultsPerPage(Number(e.target.value))}>
+					<select
+						disabled={isInputDisabled}
+						value={resultsPerPage}
+						onChange={(e) => setResultsPerPage(Number(e.target.value))}
+					>
 						<option value={5}>5</option>
 						<option value={10}>10</option>
 						<option value={20}>20</option>
 					</select>
 				</div>
-				{message && (
-					<div>
-						<small>{message}</small>
-					</div>
-				)}
 			</div>
 			{isModalOpen && (
 				<Modal title={product?.name || ''} onCancel={handleCloseDeleteModal} onConfirm={handleDeleteProduct} />
 			)}
 		</React.Fragment>
 	);
+
+	function FallbackComponent({ name }: { name: string }): JSX.Element {
+		return <div className={Rules.logo}>{name.slice(0, 2).toUpperCase()}</div>;
+	}
 
 	function toggleDropdown(product: Product, event: React.MouseEvent<SVGSVGElement>): void {
 		setProduct(product);
